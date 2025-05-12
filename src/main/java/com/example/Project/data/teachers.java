@@ -1,11 +1,11 @@
-package com.example.Project;
+package com.example.Project.data;
 
 import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity
 @Table(name = "teachers")
-public class teacher {
+public class teachers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "teacherid")
@@ -24,7 +24,7 @@ public class teacher {
     private String email;
 
     @OneToMany(mappedBy = "teacher")
-    private Set<subject> subjects;
+    private Set<subjects> subjects;
 
     public Long getTeacherId() {
         return teacherId;
@@ -66,11 +66,11 @@ public class teacher {
         this.email = email;
     }
 
-    public Set<subject> getSubjects() {
+    public Set<subjects> getSubjects() {
         return subjects;
     }
 
-    public void setSubjects(Set<subject> subjects) {
+    public void setSubjects(Set<subjects> subjects) {
         this.subjects = subjects;
     }
 }

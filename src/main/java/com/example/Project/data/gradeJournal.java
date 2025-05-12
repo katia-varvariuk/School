@@ -1,4 +1,5 @@
-package com.example.Project;
+package com.example.Project.data;
+
 import jakarta.persistence.*;
 import java.sql.Date;
 
@@ -13,11 +14,11 @@ public class gradeJournal {
 
     @ManyToOne
     @JoinColumn(name = "studentid", referencedColumnName = "studentid")
-    private student student;
+    private com.example.Project.data.students student;
 
     @ManyToOne
     @JoinColumn(name = "subjectid", referencedColumnName = "subjectid")
-    private subject subject;
+    private subjects subject;
 
     @Column(name = "grade")
     private int grade;
@@ -33,19 +34,19 @@ public class gradeJournal {
         this.journalId = journalId;
     }
 
-    public student getStudent() {
+    public com.example.Project.data.students getStudent() {
         return student;
     }
 
-    public void setStudent(student student) {
+    public void setStudent(students student) {
         this.student = student;
     }
 
-    public subject getSubject() {
+    public subjects getSubject() {
         return subject;
     }
 
-    public void setSubject(subject subject) {
+    public void setSubject(subjects subject) {
         this.subject = subject;
     }
 
@@ -57,7 +58,8 @@ public class gradeJournal {
         this.grade = grade;
     }
 
-    public Date getGradeDate() {
+
+    public java.sql.Date getGradeDate() {
         return gradeDate;
     }
 

@@ -1,11 +1,14 @@
-package com.example.Project;
+package com.example.Project.data;
+
+import com.example.Project.data.gradeJournal;
+import com.example.Project.data.subjects;
 import jakarta.persistence.*;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "subjects")
-public class subject {
+public class subjects {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "subjectid")
@@ -16,7 +19,7 @@ public class subject {
 
     @ManyToOne
     @JoinColumn(name = "teacherid", referencedColumnName = "teacherid")
-    private teacher teacher;
+    private com.example.Project.data.teachers teacher;
 
     @OneToMany(mappedBy = "subject")
     private Set<gradeJournal> gradeJournals;
@@ -37,11 +40,11 @@ public class subject {
         this.subjectName = subjectName;
     }
 
-    public teacher getTeacher() {
+    public com.example.Project.data.teachers getTeacher() {
         return teacher;
     }
 
-    public void setTeacher(teacher teacher) {
+    public void setTeacher(teachers teacher) {
         this.teacher = teacher;
     }
 

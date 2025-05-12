@@ -1,10 +1,12 @@
-package com.example.Project;
+package com.example.Project.data;
+
 import jakarta.persistence.*;
+
 import java.util.Set;
 
 @Entity
 @Table(name = "students")
-public class student {
+public class students {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "studentid")
