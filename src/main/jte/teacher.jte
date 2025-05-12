@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список викладачів</title>
     <style>
-        /* Загальні стилі */
         * {
             margin: 0;
             padding: 0;
@@ -29,7 +28,6 @@
             padding: 20px;
         }
 
-        /* Заголовок сайту */
         header {
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             color: white;
@@ -44,7 +42,6 @@
             margin-bottom: 5px;
         }
 
-        /* Навігаційне меню */
         .nav-menu {
             background-color: white;
             border-radius: 8px;
@@ -95,7 +92,6 @@
             width: 70%;
         }
 
-        /* Заголовок сторінки */
         .page-title {
             text-align: center;
             color: #1e3c72;
@@ -116,7 +112,6 @@
             transform: translateX(-50%);
         }
 
-        /* Таблиця */
         .data-table {
             width: 100%;
             border-collapse: separate;
@@ -149,7 +144,6 @@
             background-color: #f5f9ff;
         }
 
-        /* Футер */
         footer {
             text-align: center;
             padding: 20px;
@@ -159,7 +153,6 @@
             font-size: 14px;
         }
 
-        /* Адаптивність */
         @media (max-width: 768px) {
             .nav-menu ul {
                 flex-direction: column;

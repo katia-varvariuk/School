@@ -1,5 +1,4 @@
 package com.example.Project.presentation;
-
 import com.example.Project.data.subjectRepository;
 import com.example.Project.data.subjects;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,5 @@
 package com.example.Project.data;
-
 import jakarta.persistence.*;
-
 import java.util.Set;
 
 @Entity
