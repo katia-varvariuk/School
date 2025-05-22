@@ -1,13 +1,12 @@
 @param String successMessage = null
-@param boolean isAuthenticated = false
-@param String username = null
+@param String error = null
 
 <!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Шкільна система</title>
+    <title>Вхід у систему</title>
     <style>
         * {
             margin: 0;
@@ -114,54 +113,68 @@
             transform: translateX(-50%);
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+        .login-form {
             background-color: white;
             border-radius: 8px;
-            overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 30px;
+            padding: 30px;
+            max-width: 500px;
+            margin: 0 auto 30px;
         }
 
-        .data-table th {
-            background-color: #1e3c72;
-            color: white;
-            padding: 15px;
-            text-align: left;
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
             font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
         }
 
-        .data-table td {
+        .form-control {
+            width: 100%;
             padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .data-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .data-table tr:hover {
-            background-color: #f5f9ff;
-        }
-
-        .welcome-message {
-            text-align: center;
-            margin: 40px 0;
-        }
-
-        .welcome-message h2 {
-            color: #1e3c72;
-            margin-bottom: 15px;
-            font-size: 24px;
-        }
-
-        .welcome-message p {
-            color: #555;
-            max-width: 600px;
-            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #2a5298;
+            outline: none;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #2a5298, #1e3c72);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c62828;
         }
 
         .success-message {
@@ -173,11 +186,21 @@
             border-left: 4px solid #2e7d32;
         }
 
-        .user-info {
-            text-align: right;
-            margin-bottom: 20px;
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .register-link a {
             color: #2a5298;
+            text-decoration: none;
             font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .register-link a:hover {
+            color: #1e3c72;
+            text-decoration: underline;
         }
 
         footer {
@@ -198,9 +221,8 @@
                 text-align: center;
             }
 
-            .data-table {
-                overflow-x: auto;
-                display: block;
+            .login-form {
+                padding: 20px;
             }
         }
     </style>
@@ -213,18 +235,6 @@
 </header>
 
 <div class="container">
-    @if(isAuthenticated)
-        <div class="user-info">
-            Вітаємо, ${username}! | <a href="/logout">Вийти</a>
-        </div>
-    @endif
-
-    @if(successMessage != null)
-        <div class="success-message">
-            ${successMessage}
-        </div>
-    @endif
-
     <nav class="nav-menu">
         <ul>
             <li><a href="/">Головна</a></li>
@@ -232,18 +242,40 @@
             <li><a href="/teachers">Викладачі</a></li>
             <li><a href="/subjects">Предмети</a></li>
             <li><a href="/grades">Журнал оцінок</a></li>
-            @if(!isAuthenticated)
-                <li><a href="/login">Увійти</a></li>
-                <li><a href="/register">Реєстрація</a></li>
-            @endif
+            <li><a href="/register">Реєстрація</a></li>
         </ul>
     </nav>
 
-    <h1 class="page-title">Ласкаво просимо</h1>
+    <h1 class="page-title">Вхід у систему</h1>
 
-    <div class="welcome-message">
-        <h2>Шкільна система управління</h2>
-        <p>Будь ласка, виберіть розділ для перегляду з меню вище. Система допоможе вам ефективно керувати інформацією про студентів, викладачів, предмети та оцінки.</p>
+    <div class="login-form">
+        @if(successMessage != null)
+            <div class="success-message">
+                ${successMessage}
+            </div>
+        @endif
+
+        @if(error != null)
+            <div class="error-message">
+                ${error}
+            </div>
+        @endif
+
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label for="username">Ім'я користувача</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn">Увійти</button>
+        </form>
+
+        <div class="register-link">
+            <p>Немає облікового запису? <a href="/register">Зареєструватися</a></p>
+        </div>
     </div>
 </div>
 </body>
