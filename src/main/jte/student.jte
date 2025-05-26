@@ -143,6 +143,22 @@
             background-color: #f5f9ff;
         }
 
+        .details-link {
+            display: inline-block;
+            background-color: #2a5298;
+            color: white;
+            padding: 6px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .details-link:hover {
+            background-color: #1e3c72;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -195,6 +211,7 @@
             <th>Ім'я</th>
             <th>По батькові</th>
             <th>Дата народження</th>
+            <th>Дії</th>
         </tr>
         </thead>
         <tbody>
@@ -205,6 +222,11 @@
                 <td>${student.getFirstName()}</td>
                 <td>${student.getMiddleName()}</td>
                 <td>${student.getBirthDate() != null ? student.getBirthDate().toString() : ""}</td>
+                <td>
+                    <a href="/students/${student.getStudentId()}" class="details-link">
+                        Деталі та оцінки
+                    </a>
+                </td>
             </tr>
         @endfor
         </tbody>

@@ -22,7 +22,7 @@ public class students {
     @Column(name = "birthdate")
     private java.sql.Date birthDate;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student", fetch = FetchType.EAGER)
     private Set<gradeJournal> gradeJournals;
 
     public Long getStudentId() {
