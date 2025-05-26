@@ -1,7 +1,3 @@
-@param com.example.Project.data.Users user = null
-@param String error = null
-@param String successMessage = null
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -157,6 +153,47 @@
             border-color: #e74c3c;
         }
 
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .role-option {
+            flex: 1;
+            position: relative;
+        }
+
+        .role-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .role-option label {
+            display: block;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #f9f9f9;
+            font-weight: 500;
+        }
+
+        .role-option input[type="radio"]:checked + label {
+            border-color: #2a5298;
+            background-color: #e8f2ff;
+            color: #1e3c72;
+            font-weight: 600;
+        }
+
+        .role-option label:hover {
+            border-color: #2a5298;
+            background-color: #f0f7ff;
+        }
+
         .btn {
             display: inline-block;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
@@ -236,6 +273,7 @@
             color: #666;
             margin-top: 5px;
         }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -256,6 +294,11 @@
 
             .register-form {
                 padding: 20px;
+            }
+
+            .role-selector {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -282,18 +325,6 @@
     <h1 class="page-title">Реєстрація нового користувача</h1>
 
     <div class="register-form">
-        @if(successMessage != null)
-            <div class="success-message">
-                ${successMessage}
-            </div>
-        @endif
-
-        @if(error != null)
-            <div class="error-message">
-                ${error}
-            </div>
-        @endif
-
         <form id="registrationForm" action="/register" method="POST">
             <div class="form-group" id="firstNameGroup">
                 <label for="firstName">Ім'я *</label>
@@ -302,7 +333,6 @@
                        name="firstName"
                        class="form-control"
                        placeholder="Введіть ваше ім'я"
-                       value="${user != null ? user.getFirstName() : ""}"
                        required>
                 <p class="field-error">Ім'я не може бути порожнім</p>
             </div>
@@ -314,7 +344,6 @@
                        name="lastName"
                        class="form-control"
                        placeholder="Введіть ваше прізвище"
-                       value="${user != null ? user.getLastName() : ""}"
                        required>
                 <p class="field-error">Прізвище не може бути порожнім</p>
             </div>
@@ -326,10 +355,23 @@
                        name="username"
                        class="form-control"
                        placeholder="Введіть ім'я користувача"
-                       value="${user != null ? user.getUserName() : ""}"
                        required>
                 <div class="password-requirements">Мінімум 3 символи</div>
                 <p class="field-error">Ім'я користувача повинно містити мінімум 3 символи</p>
+            </div>
+
+            <div class="form-group" id="roleGroup">
+                <label>Роль *</label>
+                <div class="role-selector">
+                    <div class="role-option">
+                        <input type="radio" id="student" name="role" value="STUDENT" checked>
+                        <label for="student">👨‍🎓 Студент</label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="teacher" name="role" value="TEACHER">
+                        <label for="teacher">👨‍🏫 Викладач</label>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group" id="passwordGroup">
@@ -363,6 +405,7 @@
         </div>
     </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('registrationForm');
@@ -378,6 +421,7 @@
         const usernameGroup = document.getElementById('usernameGroup');
         const passwordGroup = document.getElementById('passwordGroup');
         const confirmPasswordGroup = document.getElementById('confirmPasswordGroup');
+
         function validateField(field, group, condition, errorMessage) {
             if (condition) {
                 group.classList.remove('error');
@@ -405,9 +449,18 @@
         });
 
         username.addEventListener('input', function() {
-            validateField(username, usernameGroup,
-                username.value.trim().length >= 3,
-                'Ім\'я користувача повинно містити мінімум 3 символи');
+            const value = username.value.trim();
+            const hasValidChars = /^[a-zA-Z0-9_.-]+$/.test(value);
+
+            if (value.length >= 3 && !hasValidChars) {
+                validateField(username, usernameGroup, false,
+                    'Ім\'я користувача може містити тільки літери, цифри, крапки, тире і підкреслення');
+            } else if (value.length < 3) {
+                validateField(username, usernameGroup, false,
+                    'Ім\'я користувача повинно містити мінімум 3 символи');
+            } else {
+                validateField(username, usernameGroup, true);
+            }
         });
 
         password.addEventListener('input', function() {
@@ -432,6 +485,7 @@
             e.preventDefault();
 
             let isValid = true;
+            const selectedRole = document.querySelector('input[name="role"]:checked').value;
 
             isValid &= validateField(firstName, firstNameGroup,
                 firstName.value.trim().length > 0,
@@ -462,7 +516,8 @@
                     lastName: lastName.value.trim(),
                     username: username.value.trim(),
                     password: password.value,
-                    confirmPassword: confirmPassword.value
+                    confirmPassword: confirmPassword.value,
+                    role: selectedRole
                 };
 
                 fetch('/api/users/register', {
@@ -494,82 +549,20 @@
             }
         });
 
-        [firstName, lastName, username, password, confirmPassword].forEach(field => {
-            field.addEventListener('focus', function() {
-                const group = field.closest('.form-group');
-                if (group && group.classList.contains('error')) {
-                    group.classList.remove('error');
-                }
-            });
-        });
-
-        username.addEventListener('input', function() {
-            const value = username.value.trim();
-            const hasValidChars = /^[a-zA-Z0-9_.-]+$/.test(value);
-
-            if (value.length >= 3 && !hasValidChars) {
-                validateField(username, usernameGroup, false,
-                    'Ім\'я користувача може містити тільки літери, цифри, крапки, тире і підкреслення');
-            } else if (value.length < 3) {
-                validateField(username, usernameGroup, false,
-                    'Ім\'я користувача повинно містити мінімум 3 символи');
-            } else {
-                validateField(username, usernameGroup, true);
-            }
-        });
-
-        function addPasswordToggle(passwordInput) {
-            const group = passwordInput.parentElement;
-            const toggleBtn = document.createElement('button');
-            toggleBtn.type = 'button';
-            toggleBtn.innerHTML = '👁️';
-            toggleBtn.style.cssText = `
-                position: absolute;
-                right: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                background: none;
-                border: none;
-                cursor: pointer;
-                font-size: 16px;
-            `;
-
-            group.style.position = 'relative';
-            passwordInput.style.paddingRight = '40px';
-            group.appendChild(toggleBtn);
-
-            toggleBtn.addEventListener('click', function() {
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    toggleBtn.innerHTML = '🙈';
-                } else {
-                    passwordInput.type = 'password';
-                    toggleBtn.innerHTML = '👁️';
-                }
-            });
-        }
-
-        addPasswordToggle(password);
-        addPasswordToggle(confirmPassword);
-
         function showSuccessMessage(message) {
             removeMessages();
-
             const successDiv = document.createElement('div');
             successDiv.className = 'success-message';
             successDiv.textContent = message;
-
             const form = document.querySelector('.register-form');
             form.insertBefore(successDiv, form.firstChild);
         }
 
         function showErrorMessage(message) {
             removeMessages();
-
             const errorDiv = document.createElement('div');
             errorDiv.className = 'error-message';
             errorDiv.textContent = message;
-
             const form = document.querySelector('.register-form');
             form.insertBefore(errorDiv, form.firstChild);
         }

@@ -94,4 +94,15 @@ public class Users {
     public String getFullName() {
         return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
     }
+
+    @Override
+    public String toString() {
+        return "Users{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", userName='" + userName + '\'' +
+                ", role='" + role + '\'' +
+                '}';
+    }
 }

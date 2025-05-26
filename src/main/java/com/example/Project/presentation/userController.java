@@ -23,7 +23,6 @@ public class userController {
 
     @GetMapping("/register")
     public String showRegistrationForm(Model model) {
-        // Додаємо порожній об'єкт користувача до модулі
         model.addAttribute("user", new Users());
         model.addAttribute("registrationDto", new UserRegistrationDto());
         return "register";

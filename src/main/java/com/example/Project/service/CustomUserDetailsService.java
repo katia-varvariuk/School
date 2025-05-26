@@ -22,14 +22,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = userRepository.findByUsername(username);
+        // Використовуємо правильний метод з репозиторію
+        Users user = userRepository.findByUserName(username);
 
         if (user == null) {
             throw new UsernameNotFoundException("Користувач не знайдений: " + username);
         }
 
         return new User(
-                user.getUsername(),
+                user.getUserName(),
                 user.getPassword(),
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
         );
