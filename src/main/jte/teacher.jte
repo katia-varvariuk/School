@@ -1,4 +1,6 @@
 @param Iterable<com.example.Project.data.teachers> teachers
+@param String successMessage = null
+@param String errorMessage = null
 
 <!DOCTYPE html>
 <html lang="uk">
@@ -112,6 +114,59 @@
             transform: translateX(-50%);
         }
 
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #dc3545;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 60, 114, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
         .data-table {
             width: 100%;
             border-collapse: separate;
@@ -162,6 +217,12 @@
                 text-align: center;
             }
 
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
             .data-table {
                 overflow-x: auto;
                 display: block;
@@ -187,7 +248,22 @@
         </ul>
     </nav>
 
-    <h1 class="page-title">Список викладачів</h1>
+    @if(successMessage != null)
+        <div class="success-message">
+            ${successMessage}
+        </div>
+    @endif
+
+    @if(errorMessage != null)
+        <div class="error-message">
+            ${errorMessage}
+        </div>
+    @endif
+
+    <div class="page-header">
+        <h1 class="page-title">Список викладачів</h1>
+        <a href="/teachers/new" class="btn btn-success">+ Додати викладача</a>
+    </div>
 
     <table class="data-table">
         <thead>
@@ -197,6 +273,7 @@
             <th>Ім'я</th>
             <th>По батькові</th>
             <th>Email</th>
+            <th>Кількість предметів</th>
         </tr>
         </thead>
         <tbody>
@@ -207,6 +284,13 @@
                 <td>${teacher.getFirstName()}</td>
                 <td>${teacher.getMiddleName()}</td>
                 <td>${teacher.getEmail()}</td>
+                <td>
+                    @if(teacher.getSubjects() != null)
+                        ${teacher.getSubjects().size()}
+                    @else
+                        0
+                    @endif
+                </td>
             </tr>
         @endfor
         </tbody>
