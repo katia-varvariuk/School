@@ -36,7 +36,6 @@ public class studentController {
             model.addAttribute("grades", student.getGradeJournals());
             return "student-details";
         } else {
-            // Якщо студента не знайдено, перенаправляємо на загальний список
             return "redirect:/students";
         }
     }

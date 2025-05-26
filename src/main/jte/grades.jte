@@ -1,4 +1,5 @@
 @param Iterable<com.example.Project.data.gradeJournal> grades
+@param String updated = null
 
 <!DOCTYPE html>
 <html lang="uk">
@@ -112,6 +113,16 @@
             transform: translateX(-50%);
         }
 
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2e7d32;
+            text-align: center;
+        }
+
         .data-table {
             width: 100%;
             border-collapse: separate;
@@ -161,6 +172,43 @@
             color: #e74c3c;
         }
 
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .btn-edit {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -182,6 +230,10 @@
             .data-table {
                 overflow-x: auto;
                 display: block;
+            }
+
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
@@ -206,6 +258,12 @@
 
     <h1 class="page-title">Журнал оцінок</h1>
 
+    @if(updated != null)
+        <div class="success-message">
+            ✅ Оцінка успішно оновлена!
+        </div>
+    @endif
+
     <table class="data-table">
         <thead>
         <tr>
@@ -214,6 +272,7 @@
             <th>Предмет</th>
             <th>Оцінка</th>
             <th>Дата</th>
+            <th>Дії</th>
         </tr>
         </thead>
         <tbody>
@@ -238,6 +297,13 @@
                     ${grade.getGrade()}
                 </td>
                 <td>${grade.getGradeDate() != null ? grade.getGradeDate().toString() : ""}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a href="/grades/edit/${grade.getJournalId()}" class="btn btn-edit">
+                            ✏️ Редагувати
+                        </a>
+                    </div>
+                </td>
             </tr>
         @endfor
         </tbody>
