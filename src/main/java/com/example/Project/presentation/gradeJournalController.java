@@ -26,10 +26,13 @@ public class gradeJournalController {
     }
 
     @GetMapping("/grades")
-    public String getAllGrades(@RequestParam(value = "updated", required = false) String updated, Model model) {
+    public String getAllGrades(@RequestParam(value = "updated", required = false) String updated,
+                               @RequestParam(value = "deleted", required = false) String deleted,
+                               Model model) {
         Iterable<gradeJournal> grades = gradeJournalRepo.findAll();
         model.addAttribute("grades", grades);
         model.addAttribute("updated", updated);
+        model.addAttribute("deleted", deleted);
         return "grades";
     }
 
@@ -86,5 +89,22 @@ public class gradeJournalController {
             }
         }
         return "redirect:/grades/edit/" + id + "?error=true";
+    }
+
+    @PostMapping("/grades/delete/{id}")
+    public String deleteGrade(@PathVariable Long id) {
+        try {
+            Optional<gradeJournal> gradeOptional = gradeJournalRepo.findById(id);
+
+            if (gradeOptional.isPresent()) {
+                gradeJournalRepo.deleteById(id);
+                return "redirect:/grades?deleted=true";
+            } else {
+                return "redirect:/grades?error=notfound";
+            }
+        } catch (Exception e) {
+            System.err.println("Помилка при видаленні оцінки: " + e.getMessage());
+            return "redirect:/grades?error=delete";
+        }
     }
 }

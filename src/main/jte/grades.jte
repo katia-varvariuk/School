@@ -1,5 +1,6 @@
 @param Iterable<com.example.Project.data.gradeJournal> grades
 @param String updated = null
+@param String deleted = null
 
 <!DOCTYPE html>
 <html lang="uk">
@@ -123,6 +124,16 @@
             text-align: center;
         }
 
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #721c24;
+            text-align: center;
+        }
+
         .data-table {
             width: 100%;
             border-collapse: separate;
@@ -209,6 +220,137 @@
             background-color: #c82333;
         }
 
+        /* Модальне вікно */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation-duration: 0.3s;
+        }
+
+        .modal.show {
+            display: block;
+            animation-name: fadeIn;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 30px;
+            border: none;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation-name: slideIn;
+            animation-duration: 0.3s;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-title {
+            color: #dc3545;
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #dc3545;
+        }
+
+        .modal-body {
+            margin-bottom: 25px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .modal-body .grade-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            background-color: #c82333;
+        }
+
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background-color: #545b62;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
         footer {
             text-align: center;
             padding: 20px;
@@ -235,6 +377,15 @@
             .action-buttons {
                 flex-direction: column;
             }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -258,56 +409,152 @@
 
     <h1 class="page-title">Журнал оцінок</h1>
 
-    @if(updated != null)
+    @if(updated != null && updated.equals("true"))
         <div class="success-message">
             ✅ Оцінка успішно оновлена!
         </div>
     @endif
 
-    <table class="data-table">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Студент</th>
-            <th>Предмет</th>
-            <th>Оцінка</th>
-            <th>Дата</th>
-            <th>Дії</th>
-        </tr>
-        </thead>
-        <tbody>
-        @for(var grade : grades)
+    @if(deleted != null && deleted.equals("true"))
+        <div class="success-message">
+            ✅ Оцінка успішно видалена!
+        </div>
+    @endif
+
+    @if(deleted != null && deleted.equals("error"))
+        <div class="error-message">
+            ❌ Помилка при видаленні оцінки!
+        </div>
+    @endif
+
+    @if(grades != null && grades.iterator().hasNext())
+        <table class="data-table">
+            <thead>
             <tr>
-                <td>${grade.getJournalId()}</td>
-                <td>
-                    @if(grade.getStudent() != null)
-                        ${grade.getStudent().getLastName()} ${grade.getStudent().getFirstName()} ${grade.getStudent().getMiddleName()}
-                    @else
-                        Невідомий студент
-                    @endif
-                </td>
-                <td>
-                    @if(grade.getSubject() != null)
-                        ${grade.getSubject().getSubjectName()}
-                    @else
-                        Невідомий предмет
-                    @endif
-                </td>
-                <td class="grade-cell ${grade.getGrade() >= 90 ? "high-grade" : (grade.getGrade() >= 75 ? "medium-grade" : "low-grade")}">
-                    ${grade.getGrade()}
-                </td>
-                <td>${grade.getGradeDate() != null ? grade.getGradeDate().toString() : ""}</td>
-                <td>
-                    <div class="action-buttons">
-                        <a href="/grades/edit/${grade.getJournalId()}" class="btn btn-edit">
-                            ✏️ Редагувати
-                        </a>
-                    </div>
-                </td>
+                <th>ID</th>
+                <th>Студент</th>
+                <th>Предмет</th>
+                <th>Оцінка</th>
+                <th>Дата</th>
+                <th>Дії</th>
             </tr>
-        @endfor
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            @for(var grade : grades)
+                <tr>
+                    <td>${grade.getJournalId()}</td>
+                    <td>
+                        @if(grade.getStudent() != null)
+                            ${grade.getStudent().getLastName()} ${grade.getStudent().getFirstName()}
+                            @if(grade.getStudent().getMiddleName() != null)
+                                ${grade.getStudent().getMiddleName()}
+                            @endif
+                        @else
+                            Не вказано
+                        @endif
+                    </td>
+                    <td>
+                        @if(grade.getSubject() != null)
+                            ${grade.getSubject().getSubjectName()}
+                        @else
+                            Не вказано
+                        @endif
+                    </td>
+                    <td class="grade-cell
+                        @if(grade.getGrade() >= 90)
+                            high-grade
+                        @elseif(grade.getGrade() >= 70)
+                            medium-grade
+                        @else
+                            low-grade
+                        @endif
+                    ">
+                        ${grade.getGrade()}
+                    </td>
+                    <td>
+                        @if(grade.getGradeDate() != null)
+                            ${grade.getGradeDate().toString()}
+                        @else
+                            Не вказано
+                        @endif
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/grades/edit/${grade.getJournalId()}" class="btn btn-edit">
+                                ✏️ Редагувати
+                            </a>
+                            <button class="btn btn-delete" onclick="showDeleteModal(
+                                    '${grade.getJournalId()}',
+                                    '@if(grade.getStudent() != null)${grade.getStudent().getLastName()} ${grade.getStudent().getFirstName()} @if(grade.getStudent().getMiddleName() != null)${grade.getStudent().getMiddleName()}@endif@else Не вказано@endif',
+                                    '@if(grade.getSubject() != null)${grade.getSubject().getSubjectName()}@else Не вказано@endif',
+                                    '${grade.getGrade()}'
+                                    )">
+                                🗑️ Видалити
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            @endfor
+            </tbody>
+        </table>
+    @else
+        <div class="empty-state">
+            <h3>Оцінки відсутні</h3>
+            <p>В журналі поки що немає жодної оцінки.</p>
+        </div>
+    @endif
 </div>
+
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Підтвердження видалення</h2>
+            <span class="close" onclick="closeDeleteModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Ви дійсно хочете видалити цю оцінку?</p>
+            <div class="grade-info">
+                <strong>Деталі оцінки:</strong><br>
+                <span id="modal-student">Студент: </span><br>
+                <span id="modal-subject">Предмет: </span><br>
+                <span id="modal-grade">Оцінка: </span>
+            </div>
+            <p><strong>Увага!</strong> Ця дія є незворотною.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal btn-cancel" onclick="closeDeleteModal()">Скасувати</button>
+            <form id="deleteForm" method="post" style="display: inline;">
+                <button type="submit" class="btn-modal btn-confirm">Видалити</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showDeleteModal(id, student, subject, grade) {
+        document.getElementById('modal-student').innerHTML = 'Студент: ' + student;
+        document.getElementById('modal-subject').innerHTML = 'Предмет: ' + subject;
+        document.getElementById('modal-grade').innerHTML = 'Оцінка: ' + grade;
+
+        document.getElementById('deleteForm').action = '/grades/delete/' + id;
+        document.getElementById('deleteModal').classList.add('show');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('show');
+    }
+    window.onclick = function(event) {
+        const modal = document.getElementById('deleteModal');
+        if (event.target === modal) {
+            closeDeleteModal();
+        }
+    }
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeDeleteModal();
+        }
+    });
+</script>
+
 </body>
 </html>
