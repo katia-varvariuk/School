@@ -6,6 +6,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -28,11 +30,34 @@ public class gradeJournalController {
     @GetMapping("/grades")
     public String getAllGrades(@RequestParam(value = "updated", required = false) String updated,
                                @RequestParam(value = "deleted", required = false) String deleted,
+                               @RequestParam(value = "error", required = false) String error,
+                               @RequestParam(value = "sort", required = false) String sort,
                                Model model) {
-        Iterable<gradeJournal> grades = gradeJournalRepo.findAll();
+
+        List<gradeJournal> grades = new ArrayList<>();
+        String currentSort = "";
+
+        // Визначаємо тип сортування
+        if ("asc".equals(sort)) {
+            grades = gradeJournalRepo.findAllOrderByStudentLastNameAsc();
+            currentSort = "asc";
+        } else if ("desc".equals(sort)) {
+            grades = gradeJournalRepo.findAllOrderByStudentLastNameDesc();
+            currentSort = "desc";
+        } else {
+            // За замовчуванням показуємо без сортування
+            Iterable<gradeJournal> allGrades = gradeJournalRepo.findAll();
+            for (gradeJournal grade : allGrades) {
+                grades.add(grade);
+            }
+        }
+
         model.addAttribute("grades", grades);
         model.addAttribute("updated", updated);
         model.addAttribute("deleted", deleted);
+        model.addAttribute("error", error);
+        model.addAttribute("currentSort", currentSort);
+
         return "grades";
     }
 
@@ -91,20 +116,48 @@ public class gradeJournalController {
         return "redirect:/grades/edit/" + id + "?error=true";
     }
 
+    // Виправлений метод видалення конкретної оцінки
     @PostMapping("/grades/delete/{id}")
-    public String deleteGrade(@PathVariable Long id) {
+    public String deleteGradeEntry(@PathVariable Long id) {
         try {
+            // Перевіряємо чи існує запис з оцінкою
             Optional<gradeJournal> gradeOptional = gradeJournalRepo.findById(id);
 
             if (gradeOptional.isPresent()) {
+                gradeJournal gradeToDelete = gradeOptional.get();
+
+                // Логуємо що саме видаляємо для відладки
+                System.out.println("Видаляємо оцінку: ID=" + gradeToDelete.getJournalId()
+                        + ", Студент=" + (gradeToDelete.getStudent() != null ?
+                        gradeToDelete.getStudent().getFirstName() + " " + gradeToDelete.getStudent().getLastName() : "Невідомий")
+                        + ", Предмет=" + (gradeToDelete.getSubject() != null ?
+                        gradeToDelete.getSubject().getSubjectName() : "Невідомий")
+                        + ", Оцінка=" + gradeToDelete.getGrade());
+
+                // Видаляємо ТІЛЬКИ запис про оцінку, а не студента чи предмет
                 gradeJournalRepo.deleteById(id);
+
+                System.out.println("Оцінку успішно видалено з журналу");
                 return "redirect:/grades?deleted=true";
             } else {
+                System.err.println("Оцінка з ID " + id + " не знайдена");
                 return "redirect:/grades?error=notfound";
             }
         } catch (Exception e) {
-            System.err.println("Помилка при видаленні оцінки: " + e.getMessage());
-            return "redirect:/grades?error=delete";
+            System.err.println("Помилка при видаленні оцінки з ID " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/grades?deleted=error";
+        }
+    }
+
+    // Додатковий метод для перевірки чи можна видалити оцінку
+    private boolean canDeleteGrade(Long gradeId) {
+        try {
+            Optional<gradeJournal> gradeOptional = gradeJournalRepo.findById(gradeId);
+            return gradeOptional.isPresent();
+        } catch (Exception e) {
+            System.err.println("Помилка перевірки можливості видалення: " + e.getMessage());
+            return false;
         }
     }
 }

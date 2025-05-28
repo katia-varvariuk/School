@@ -38,7 +38,6 @@ public class UserRegistrationDto {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
-    // Допоміжні методи для валідації
     public boolean isPasswordMatching() {
         return password != null && password.equals(confirmPassword);
     }

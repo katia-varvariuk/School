@@ -1,6 +1,7 @@
 @param Iterable<com.example.Project.data.gradeJournal> grades
 @param String updated = null
 @param String deleted = null
+@param String currentSort = ""
 
 <!DOCTYPE html>
 <html lang="uk">
@@ -114,6 +115,61 @@
             transform: translateX(-50%);
         }
 
+        /* Стилі для кнопок сортування */
+        .sort-controls {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .sort-controls h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .sort-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .sort-btn {
+            padding: 10px 20px;
+            border: 2px solid #1e3c72;
+            border-radius: 25px;
+            background-color: white;
+            color: #1e3c72;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .sort-btn:hover {
+            background-color: #1e3c72;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 60, 114, 0.2);
+        }
+
+        .sort-btn.active {
+            background-color: #1e3c72;
+            color: white;
+            box-shadow: 0 2px 4px rgba(30, 60, 114, 0.3);
+        }
+
+        .sort-btn .icon {
+            font-size: 16px;
+        }
+
         .success-message {
             background-color: #e8f5e9;
             color: #2e7d32;
@@ -151,6 +207,16 @@
             padding: 15px;
             text-align: left;
             font-weight: 600;
+            position: relative;
+        }
+
+        .data-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th.sortable:hover {
+            background-color: #2a5298;
         }
 
         .data-table td {
@@ -369,6 +435,16 @@
                 text-align: center;
             }
 
+            .sort-buttons {
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .sort-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+
             .data-table {
                 overflow-x: auto;
                 display: block;
@@ -409,6 +485,25 @@
 
     <h1 class="page-title">Журнал оцінок</h1>
 
+    <!-- Панель управління сортуванням -->
+    <div class="sort-controls">
+        <h3>🔄 Сортування за прізвищем студента</h3>
+        <div class="sort-buttons">
+            <a href="/grades" class="sort-btn @if(currentSort.isEmpty()) active @endif">
+                <span class="icon">📋</span>
+                Без сортування
+            </a>
+            <a href="/grades?sort=asc" class="sort-btn @if(currentSort.equals("asc")) active @endif">
+                <span class="icon">⬆️</span>
+                А → Я (зростання)
+            </a>
+            <a href="/grades?sort=desc" class="sort-btn @if(currentSort.equals("desc")) active @endif">
+                <span class="icon">⬇️</span>
+                Я → А (спадання)
+            </a>
+        </div>
+    </div>
+
     @if(updated != null && updated.equals("true"))
         <div class="success-message">
             ✅ Оцінка успішно оновлена!
@@ -432,7 +527,14 @@
             <thead>
             <tr>
                 <th>ID</th>
-                <th>Студент</th>
+                <th class="sortable">
+                    Студент
+                    @if(currentSort.equals("asc"))
+                        ⬆️
+                    @elseif(currentSort.equals("desc"))
+                        ⬇️
+                    @endif
+                </th>
                 <th>Предмет</th>
                 <th>Оцінка</th>
                 <th>Дата</th>
@@ -445,7 +547,7 @@
                     <td>${grade.getJournalId()}</td>
                     <td>
                         @if(grade.getStudent() != null)
-                            ${grade.getStudent().getLastName()} ${grade.getStudent().getFirstName()}
+                            <strong>${grade.getStudent().getLastName()}</strong> ${grade.getStudent().getFirstName()}
                             @if(grade.getStudent().getMiddleName() != null)
                                 ${grade.getStudent().getMiddleName()}
                             @endif
@@ -543,12 +645,14 @@
     function closeDeleteModal() {
         document.getElementById('deleteModal').classList.remove('show');
     }
+
     window.onclick = function(event) {
         const modal = document.getElementById('deleteModal');
         if (event.target === modal) {
             closeDeleteModal();
         }
     }
+
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeDeleteModal();

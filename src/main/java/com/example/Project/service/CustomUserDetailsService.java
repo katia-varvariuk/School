@@ -22,7 +22,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Використовуємо правильний метод з репозиторію
         Users user = userRepository.findByUserName(username);
 
         if (user == null) {
