@@ -37,7 +37,6 @@ public class gradeJournalController {
         List<gradeJournal> grades = new ArrayList<>();
         String currentSort = "";
 
-        // Визначаємо тип сортування
         if ("asc".equals(sort)) {
             grades = gradeJournalRepo.findAllOrderByStudentLastNameAsc();
             currentSort = "asc";
@@ -45,7 +44,6 @@ public class gradeJournalController {
             grades = gradeJournalRepo.findAllOrderByStudentLastNameDesc();
             currentSort = "desc";
         } else {
-            // За замовчуванням показуємо без сортування
             Iterable<gradeJournal> allGrades = gradeJournalRepo.findAll();
             for (gradeJournal grade : allGrades) {
                 grades.add(grade);
@@ -116,17 +114,14 @@ public class gradeJournalController {
         return "redirect:/grades/edit/" + id + "?error=true";
     }
 
-    // Виправлений метод видалення конкретної оцінки
     @PostMapping("/grades/delete/{id}")
     public String deleteGradeEntry(@PathVariable Long id) {
         try {
-            // Перевіряємо чи існує запис з оцінкою
             Optional<gradeJournal> gradeOptional = gradeJournalRepo.findById(id);
 
             if (gradeOptional.isPresent()) {
                 gradeJournal gradeToDelete = gradeOptional.get();
 
-                // Логуємо що саме видаляємо для відладки
                 System.out.println("Видаляємо оцінку: ID=" + gradeToDelete.getJournalId()
                         + ", Студент=" + (gradeToDelete.getStudent() != null ?
                         gradeToDelete.getStudent().getFirstName() + " " + gradeToDelete.getStudent().getLastName() : "Невідомий")
@@ -134,7 +129,6 @@ public class gradeJournalController {
                         gradeToDelete.getSubject().getSubjectName() : "Невідомий")
                         + ", Оцінка=" + gradeToDelete.getGrade());
 
-                // Видаляємо ТІЛЬКИ запис про оцінку, а не студента чи предмет
                 gradeJournalRepo.deleteById(id);
 
                 System.out.println("Оцінку успішно видалено з журналу");
@@ -150,7 +144,6 @@ public class gradeJournalController {
         }
     }
 
-    // Додатковий метод для перевірки чи можна видалити оцінку
     private boolean canDeleteGrade(Long gradeId) {
         try {
             Optional<gradeJournal> gradeOptional = gradeJournalRepo.findById(gradeId);

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.List;
 
 @Controller
 public class teacherController {
@@ -26,7 +27,56 @@ public class teacherController {
     @GetMapping("/teachers")
     public String getAllTeachers(Model model) {
         Iterable<teachers> teachers = teacherRepo.findAll();
+        Iterable<subjects> subjects = subjectRepo.findAll();
+
         model.addAttribute("teachers", teachers);
+        model.addAttribute("subjects", subjects);
+        model.addAttribute("isSearchResult", false);
+        return "teacher";
+    }
+
+    @GetMapping("/teachers/search")
+    public String searchTeachers(@RequestParam("searchType") String searchType,
+                                 @RequestParam("searchValue") String searchValue,
+                                 Model model) {
+
+        List<teachers> searchResults;
+        String searchMessage;
+
+        try {
+            if ("subjectName".equals(searchType)) {
+                searchResults = teacherRepo.findBySubjectNameContainingIgnoreCase(searchValue);
+                searchMessage = "Результати пошуку викладачів за предметом: \"" + searchValue + "\"";
+            } else if ("subjectId".equals(searchType)) {
+                Long subjectId = Long.parseLong(searchValue);
+                searchResults = teacherRepo.findBySubjectId(subjectId);
+
+                subjects subject = subjectRepo.findById(subjectId).orElse(null);
+                String subjectName = subject != null ? subject.getSubjectName() : "ID: " + subjectId;
+                searchMessage = "Результати пошуку викладачів за предметом: \"" + subjectName + "\"";
+            } else {
+                searchResults = List.of();
+                searchMessage = "Невірний тип пошуку";
+            }
+            Iterable<subjects> subjects = subjectRepo.findAll();
+
+            model.addAttribute("teachers", searchResults);
+            model.addAttribute("subjects", subjects);
+            model.addAttribute("searchMessage", searchMessage);
+            model.addAttribute("searchValue", searchValue);
+            model.addAttribute("searchType", searchType);
+            model.addAttribute("isSearchResult", true);
+            model.addAttribute("searchResultsCount", searchResults.size());
+
+        } catch (Exception e) {
+            Iterable<subjects> subjects = subjectRepo.findAll();
+            model.addAttribute("teachers", List.of());
+            model.addAttribute("subjects", subjects);
+            model.addAttribute("errorMessage", "Помилка пошуку: " + e.getMessage());
+            model.addAttribute("isSearchResult", true);
+            model.addAttribute("searchResultsCount", 0);
+        }
+
         return "teacher";
     }
 
